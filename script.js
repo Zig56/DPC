@@ -184,8 +184,44 @@ class FossilMarket {
       "Gilded Fossil": "🍄🕳️ Грибные пещеры / Глубины Бездны",
       "Encrusted Fossil": "🔥 Магмовый разлом",
       "Sanctified Fossil": "🍄 Грибные пещеры",
-      "Tangled Fossil": "⛏️ Шахты"
+      "Tangled Fossil": "⛏️ Шахты",
+      "Glyphic Fossil": "Затерянная во времени пещера",
+      "Volatile Fossil": "Расплавленная полость",
+      "Shuddering Fossil": "Отсыревшая трещина",
+      "Bloodstained Fossil": "Расплавленная полость",
+      "Fractured Fossil": "Окаменевший лес"
     };
+
+    // --- ДОБАВЛЕН НОВЫЙ ОБЪЕКТ ДЛЯ ПЕРЕВОДА НАЗВАНИЙ ---
+    this.FOSSIL_RU_NAMES = {
+      "Hollow Fossil": "Пустотное ископаемое",
+      "Bound Fossil": "Связанное ископаемое",
+      "Jagged Fossil": "Зазубренное ископаемое",
+      "Dense Fossil": "Плотное ископаемое",
+      "Aberrant Fossil": "Искаженное ископаемое",
+      "Pristine Fossil": "Первозданное ископаемое",
+      "Metallic Fossil": "Металлическое ископаемое",
+      "Serrated Fossil": "Зазубренное ископаемое",
+      "Aetheric Fossil": "Эфирное ископаемое",
+      "Frigid Fossil": "Мерзлое ископаемое",
+      "Prismatic Fossil": "Призматическое ископаемое",
+      "Scorched Fossil": "Опаленное ископаемое",
+      "Deft Fossil": "Ловкое ископаемое",
+      "Fundamental Fossil": "Фундаментальное ископаемое",
+      "Lucent Fossil": "Светящееся ископаемое",
+      "Perfect Fossil": "Идеальное ископаемое",
+      "Corroded Fossil": "Разъеденное ископаемое",
+      "Gilded Fossil": "Позолоченное ископаемое",
+      "Encrusted Fossil": "Инкрустированное ископаемое",
+      "Sanctified Fossil": "Освященное ископаемое",
+      "Tangled Fossil": "Запутанное ископаемое",
+      "Glyphic Fossil": "Глифическое ископаемое",
+      "Volatile Fossil": "Изменчивое ископаемое",
+      "Shuddering Fossil": "Дрожащее ископаемое",
+      "Bloodstained Fossil": "Окровавленное ископаемое",
+      "Fractured Fossil": "Расколотое ископаемое"
+    };
+    // ---------------------------------------------------
     
     this.init();
   }
@@ -314,6 +350,9 @@ class FossilMarket {
       
       const rankNumber = index + 1;
       
+      // --- ИЗМЕНЕНА СТРОКА ДЛЯ ВЫВОДА НАЗВАНИЯ ИСКОПАЕМОГО ---
+      const fossilNameRu = this.FOSSIL_RU_NAMES[fossil.name] || fossil.name;
+      
       return `
         <tr>
           <td class="text-center">
@@ -322,7 +361,7 @@ class FossilMarket {
               <img src="${fossil.icon}" class="icon" alt="${fossil.name}" onerror="this.style.display='none'">
             </div>
           </td>
-          <td class="font-bold">${fossil.name}</td>
+          <td class="font-bold">${fossilNameRu}</td>
           <td class="status-positive font-bold">${fossil.chaosValue.toFixed(1)} хаос</td>
           <td>
             <div style="display: flex; align-items: center; gap: 8px;">
