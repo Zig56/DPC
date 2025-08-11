@@ -315,7 +315,8 @@ class FossilMarket {
       "Volatile Fossil": "🌋 Расплавленная полость",
       "Shuddering Fossil": "💧 Отсыревшая трещина",
       "Bloodstained Fossil": "🌋 Расплавленная полость",
-      "Fractured Fossil": "🌳 Окаменевший лес"
+      "Fractured Fossil": "🌳 Окаменевший лес",
+      "Faceted Fossil": "🌋 Расплавленная полость"
     };
 
     this.FOSSIL_BIOME_EN = {
@@ -344,7 +345,8 @@ class FossilMarket {
       "Volatile Fossil": "🌋 Molten Cavity",
       "Shuddering Fossil": "💧 Soggy Fissure",
       "Bloodstained Fossil": "🌋 Molten Cavity",
-      "Fractured Fossil": "🌳 Petrified Forest"
+      "Fractured Fossil": "🌳 Petrified Forest",
+      "Faceted Fossil": "🌋 Molten Cavity"
     };
 
     this.FOSSIL_RU_NAMES = {
@@ -373,7 +375,8 @@ class FossilMarket {
       "Volatile Fossil": "Изменчивое ископаемое",
       "Shuddering Fossil": "Дрожащее ископаемое",
       "Bloodstained Fossil": "Окровавленное ископаемое",
-      "Fractured Fossil": "Расколотое ископаемое"
+      "Fractured Fossil": "Расколотое ископаемое",
+      "Faceted Fossil": "Гранёное ископаемое"
     };
 
     this.FOSSIL_EN_NAMES = {
@@ -611,3 +614,4 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('language-switcher').value = currentLanguage;
   updateLanguage();
 });
+
