@@ -1,4 +1,4 @@
-// --- ДОБАВЛЕН ОБЪЕКТ С ПЕРЕВОДАМИ ---
+// --- ОБЪЕКТ С ПЕРЕВОДАМИ ---
 const translations = {
   ru: {
     subtitle_text: 'Оптимизация продажи резонаторов и ископаемых',
@@ -78,7 +78,7 @@ const translations = {
 // ----------------------------------------------------------------------
 
 
-// --- ДОБАВЛЕНА ГЛОБАЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ЯЗЫКА ---
+// --- ГЛОБАЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ЯЗЫКА ---
 let currentLanguage = 'ru';
 
 function updateLanguage() {
@@ -113,6 +113,7 @@ function updateLanguage() {
 
   // Пересчитываем результаты, чтобы обновить текст
   const calculator = new ResonatorCalculator();
+  calculator.renderResonatorCosts(); // ИСПРАВЛЕНИЕ: Добавлен вызов для отображения стоимости
   calculator.calculate();
 
   // Обновляем ископаемые
@@ -162,6 +163,17 @@ class ResonatorCalculator {
       element.addEventListener('input', () => this.calculate());
       element.addEventListener('keyup', () => this.calculate());
     });
+  }
+  
+  // ИСПРАВЛЕНИЕ: ДОБАВЛЕН НОВЫЙ МЕТОД ДЛЯ ОТОБРАЖЕНИЯ СТОИМОСТИ РЕЗОНАТОРОВ
+  renderResonatorCosts() {
+    const powerfulCostElement = document.querySelector('img[alt="Powerful"]').parentElement.parentElement.nextElementSibling.querySelector('span');
+    const activeCostElement = document.querySelector('img[alt="Potent"]').parentElement.parentElement.nextElementSibling.querySelector('span');
+    const simpleCostElement = document.querySelector('img[alt="Prime"]').parentElement.parentElement.nextElementSibling.querySelector('span');
+
+    powerfulCostElement.textContent = this.resonators.powerful.cost;
+    activeCostElement.textContent = this.resonators.active.cost;
+    simpleCostElement.textContent = this.resonators.simple.cost;
   }
   
   calculate() {
@@ -405,7 +417,8 @@ class FossilMarket {
       "Volatile Fossil": "Volatile Fossil",
       "Shuddering Fossil": "Shuddering Fossil",
       "Bloodstained Fossil": "Bloodstained Fossil",
-      "Fractured Fossil": "Fractured Fossil"
+      "Fractured Fossil": "Fractured Fossil",
+      "Faceted Fossil": "Faceted Fossil" // ИСПРАВЛЕНИЕ: Добавлен Faceted Fossil
     };
 
     this.currentFossilData = null; // Для сохранения данных после загрузки
@@ -503,115 +516,4 @@ class FossilMarket {
           this.currentFossilData = data.lines;
           this.renderFossilData(data.lines);
           const lang = currentLanguage;
-          lastUpdated.innerHTML = `<span data-i18n="last_updated_prefix">${translations[lang].last_updated_prefix}</span> ${new Date().toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')}`;
-          return;
-        }
-      } catch (error) {
-        console.warn(`Failed to fetch from ${endpoint}:`, error);
-        continue;
-      }
-    }
-    
-    tbody.innerHTML = '<tr><td colspan="5" class="text-center status-negative">❌ <span data-i18n="loading_error_text">Не удалось загрузить данные. Проверьте подключение или попробуйте позже.</span></td></tr>';
-  }
-  
-  renderFossilData(lines) {
-    const tbody = document.getElementById('fossilTableBody');
-    const lang = currentLanguage;
-    const biomeMap = lang === 'ru' ? this.FOSSIL_BIOME_RU : this.FOSSIL_BIOME_EN;
-    const nameMap = lang === 'ru' ? this.FOSSIL_RU_NAMES : this.FOSSIL_EN_NAMES;
-    
-    const topFossils = lines
-      .filter(item => item.chaosValue > 0)
-      .sort((a, b) => b.chaosValue - a.chaosValue)
-      .slice(0, 5);
-    
-    if (topFossils.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="5" class="text-center status-neutral" data-i18n="no_data_text">Нет данных для выбранной лиги</td></tr>`;
-      return;
-    }
-    
-    const html = topFossils.map((fossil, index) => {
-      const change = fossil.sparkline?.totalChange || 0;
-      const changeClass = change > 3 ? 'status-positive' : change < -3 ? 'status-negative' : 'status-neutral';
-      const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
-      
-      const biome = biomeMap[fossil.name] || '—';
-      const sparklineSvg = this.generateSparkline(fossil.sparkline?.data);
-      
-      const rankNumber = index + 1;
-      
-      const fossilName = nameMap[fossil.name] || fossil.name;
-      
-      return `
-        <tr>
-          <td class="text-center">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-              <span style="font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">${rankNumber}.</span>
-              <img src="${fossil.icon}" class="icon" alt="${fossil.name}" onerror="this.style.display='none'">
-            </div>
-          </td>
-          <td class="font-bold">${fossilName}</td>
-          <td class="status-positive font-bold">${fossil.chaosValue.toFixed(1)} ${translations[lang].chaos_label}</td>
-          <td>
-            <div style="display: flex; align-items: center; gap: 8px;">
-              ${sparklineSvg}
-              <span class="${changeClass} font-bold">${changeText}</span>
-            </div>
-          </td>
-          <td>
-            <span style="display: inline-block; padding: 4px 8px; border: 1px solid var(--border-secondary); border-radius: 16px; font-size: 0.75rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); white-space: nowrap;">
-              ${biome}
-            </span>
-          </td>
-        </tr>
-      `;
-    }).join('');
-    
-    tbody.innerHTML = html;
-  }
-
-  generateSparkline(data) {
-    if (!data || data.length === 0) return '';
-    
-    const filteredData = data.filter(d => d !== null);
-    if (filteredData.length < 2) return '';
-
-    const width = 60;
-    const height = 30;
-    const padding = 2;
-    const max = Math.max(...filteredData);
-    const min = Math.min(...filteredData);
-    const range = max - min;
-    
-    if (range === 0) return '';
-    
-    const points = filteredData.map((d, i) => {
-      const x = i / (filteredData.length - 1) * (width - padding * 2) + padding;
-      const y = (1 - (d - min) / range) * (height - padding * 2) + padding;
-      return `${x.toFixed(1)},${y.toFixed(1)}`;
-    }).join(' ');
-
-    const lastPoint = points.split(' ').pop().split(',');
-    const trend = filteredData[filteredData.length - 1] > filteredData[0] ? 'up' : 'down';
-    const strokeColor = trend === 'up' ? 'var(--accent-green)' : 'var(--accent-red)';
-
-    return `
-      <div class="sparkline">
-        <svg width="${width}" height="${height}">
-          <polyline points="${points}" style="fill: none; stroke: ${strokeColor}; stroke-width: 1.5;" />
-          <circle cx="${lastPoint[0]}" cy="${lastPoint[1]}" r="2" style="fill: ${strokeColor}; stroke: none;" />
-        </svg>
-      </div>
-    `;
-  }
-}
-
-// Initialize application
-document.addEventListener('DOMContentLoaded', () => {
-  new ResonatorCalculator();
-  const fossilMarket = new FossilMarket();
-  document.getElementById('language-switcher').value = currentLanguage;
-  updateLanguage();
-});
-
+          lastUpdated.innerHTML = `<span data-i18n="last_updated_prefix">${translations[lang].last_updated_prefix}</span> ${
