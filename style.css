@@ -39,6 +39,7 @@ body {
 header {
   text-align: center;
   margin-bottom: 32px;
+  position: relative;
 }
 
 header h1 {
@@ -319,8 +320,8 @@ header #language-switcher {
   font-size: 0.95rem;
 }
 
-.result-row:last-of-type {
-  border-bottom: none;
+.result-row:not(:last-child) {
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
 }
 
 .result-row.total {
@@ -381,12 +382,60 @@ header #language-switcher {
   height: 32px;
 }
 
+/* Controls group in fossil section */
+.controls-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Progress bar alignment */
+.progress-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px 0;
+  color: var(--text-secondary);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.progress-bar {
+  flex-grow: 1;
+  height: 4px;
+  background-color: var(--border-primary);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 50%;
+  height: 100%;
+  background-color: var(--accent-blue);
+  animation: loading-animation 1.5s infinite ease-in-out;
+}
+
+@keyframes loading-animation {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+.text-center {
+  text-align: center;
+}
 /* Responsive adjustments */
 @media (max-width: 768px) {
   header {
     text-align: left;
     position: relative;
-    padding-right: 80px; /* Make space for the switcher */
+    padding-right: 80px;
   }
 
   header #language-switcher {
@@ -423,45 +472,15 @@ header #language-switcher {
     border-bottom: none;
     padding: 12px 16px;
   }
-}
 
-/* Loading/Progress Bar */
-.progress-container {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  padding: 16px 0;
-  color: var(--text-secondary);
-}
+  .controls-group {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+  }
 
-.progress-bar {
-  flex-grow: 1;
-  height: 4px;
-  background-color: var(--border-primary);
-  border-radius: 2px;
-  position: relative;
-  overflow: hidden;
+  .controls-group select,
+  .controls-group button {
+    width: 100%;
+  }
 }
-
-.progress-bar::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 50%;
-  height: 100%;
-  background-color: var(--accent-blue);
-  animation: loading-animation 1.5s infinite ease-in-out;
-}
-
-@keyframes loading-animation {
-  0% { transform: translateX(-100%); }
-  50% { transform: translateX(100%); }
-  100% { transform: translateX(100%); }
-}
-
-.text-center {
-  text-align: center;
-}
-
