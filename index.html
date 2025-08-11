@@ -27,80 +27,85 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title">
-            <img src="https://www.poewiki.net/images/thumb/4/4c/Azurite_Fissure_delve_node_icon.png/40px-Azurite_Fissure_delve_node_icon.png" class="icon-lg" alt="Azurite">
+            <img src="https://www.poewiki.net/images/thumb/4/4c/Azurite_Fissure_delve_node_icon.png/32px-Azurite_Fissure_delve_node_icon.png" class="icon-lg" alt="Azurite">
             <span data-i18n="calc_params_title">Параметры расчёта</span>
           </div>
         </div>
-        
         <div class="input-group compact">
-          <label class="input-label" data-i18n="azurite_amount_label" data-tooltip-i18n="azurite_amount_tooltip">Количество азурита</label>
-          <input type="number" id="azuriteAmount" class="input-field" placeholder="50000" min="0" max="999999" step="100">
+          <label class="input-label" for="azuriteAmount" data-i18n="azurite_amount_label" data-tooltip-i18n="azurite_amount_tooltip">Количество азурита</label>
+          <input type="number" id="azuriteAmount" class="input-field" placeholder="100000">
         </div>
 
-        <div class="table-container">
-          <table class="table">
-            <thead>
-              <tr>
-                <th data-i18n="resonator_table_header">Резонатор</th>
-                <th data-i18n="cost_table_header">Стоимость</th>
-                <th data-i18n="sale_price_table_header">Цена продажи</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="https://cdn.poedb.tw/image/Art/2DItems/Currency/Delve/Reroll2x2A.webp" class="icon" alt="Powerful">
-                    <span class="font-bold"></span>
-                  </div>
-                </td>
-                <td><span class="status-neutral"></span></td>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <input type="number" id="powerfulPrice" class="input-field input-compact" placeholder="0.0" step="0.1" min="0">
-                    <span class="text-sm status-neutral" data-i18n="chaos_label">хаос</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="https://cdn.poedb.tw/image/Art/2DItems/Currency/Delve/Reroll2x1A.webp" class="icon" alt="Potent">
-                    <span class="font-bold"></span>
-                  </div>
-                </td>
-                <td><span class="status-neutral"></span></td>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <input type="number" id="activePrice" class="input-field input-compact" placeholder="0.0" step="0.1" min="0">
-                    <span class="text-sm status-neutral" data-i18n="chaos_label">хаос</span>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 12px;">
-                    <img src="https://cdn.poedb.tw/image/Art/2DItems/Currency/Delve/Reroll1x1A.webp" class="icon" alt="Prime">
-                    <span class="font-bold"></span>
-                  </div>
-                </td>
-                <td><span class="status-neutral"></span></td>
-                <td>
-                  <div style="display: flex; align-items: center; gap: 8px;">
-                    <input type="number" id="simplePrice" class="input-field input-compact" placeholder="0.0" step="0.1" min="0">
-                    <span class="text-sm status-neutral" data-i18n="chaos_label">хаос</span>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <table class="table">
+          <thead>
+            <tr>
+              <th data-i18n="resonator_table_header">Резонатор</th>
+              <th style="width: 120px;" data-i18n="cost_table_header">Стоимость</th>
+              <th style="width: 180px;" data-i18n="sale_price_table_header">Цена продажи</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="https://www.poewiki.net/images/f/fe/Powerful_Resonator_inventory_icon.png" class="icon" alt="Powerful">
+                  <span>Мощный резонатор</span>
+                </div>
+              </td>
+              <td><span class="status-neutral">3750</span></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="number" id="powerfulPrice" class="input-field input-compact" placeholder="5">
+                  <span class="text-muted" data-i18n="chaos_label">хаос</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="https://www.poewiki.net/images/6/63/Potent_Resonator_inventory_icon.png" class="icon" alt="Potent">
+                  <span>Активный резонатор</span>
+                </div>
+              </td>
+              <td><span class="status-neutral">750</span></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="number" id="activePrice" class="input-field input-compact" placeholder="0.5">
+                  <span class="text-muted" data-i18n="chaos_label">хаос</span>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <img src="https://www.poewiki.net/images/2/22/Simple_Resonator_inventory_icon.png" class="icon" alt="Prime">
+                  <span>Простой резонатор</span>
+                </div>
+              </td>
+              <td><span class="status-neutral">300</span></td>
+              <td>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <input type="number" id="simplePrice" class="input-field input-compact" placeholder="0.1">
+                  <span class="text-muted" data-i18n="chaos_label">хаос</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
 
-      <div id="calculatorResults" class="results-grid">
-        <div class="result-card">
-          <div class="result-title">📊 <span data-i18n="initial_calc_title">Готов к расчёту</span></div>
-          <p class="text-center status-neutral" data-i18n="initial_calc_text">Введите количество азурита и цены резонаторов для расчёта оптимальной стратегии</p>
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <img src="https://www.poewiki.net/images/8/87/Currency_skill_icon.png" class="icon-lg" alt="Profit">
+            <span>Результаты</span>
+          </div>
+        </div>
+        <div class="results-grid" id="calculatorResults">
+          <div class="result-card">
+            <div class="result-title">📊 Готов к расчёту</div>
+            <p class="text-center status-neutral">Введите количество азурита и цены резонаторов для расчёта оптимальной стратегии</p>
+          </div>
         </div>
       </div>
     </div>
@@ -109,10 +114,11 @@
       <div class="card">
         <div class="card-header">
           <div class="card-title">
-            🗿 <span data-i18n="top_fossils_title">Топ‑5 ископаемых по цене</span>
+            <span>📈 </span>
+            <span data-i18n="top_fossils_title">Топ‑5 ископаемых по цене</span>
           </div>
-          <div class="header-controls">
-            <select id="leagueSelect" class="input-field">
+          <div class="controls-group">
+            <select id="leagueSelect">
               <option data-i18n="loading_leagues_text">Загрузка лиг...</option>
             </select>
             <button id="refreshBtn" class="btn btn-sm" data-i18n="refresh_button">Обновить</button>
@@ -143,13 +149,12 @@
 
         <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border-primary); color: var(--text-muted); font-size: 0.85rem; text-align: center;">
           <span id="lastUpdated"><span data-i18n="last_updated_prefix">Последнее обновление:</span> —</span>
-          <span style="margin-left: 16px;">📊 <span data-i18n="source_text">Источник: poe.ninja</span></span>
+          <br>
+          <a href="https://poe.ninja" target="_blank" rel="noopener noreferrer" style="color: var(--text-muted); text-decoration: none; display: block; margin-top: 8px;" data-i18n="source_text">Источник: poe.ninja</a>
         </div>
       </div>
     </div>
   </div>
-
-<script src="script.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
-
