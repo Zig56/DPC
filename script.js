@@ -81,7 +81,7 @@ const translations = {
 // --- ГЛОБАЛЬНАЯ ФУНКЦИЯ ДЛЯ ОБНОВЛЕНИЯ ЯЗЫКА ---
 let currentLanguage = 'ru';
 
-function updateLanguage() {
+function updateLanguage(calculator, market) {
   const elements = document.querySelectorAll('[data-i18n]');
   elements.forEach(element => {
     const key = element.getAttribute('data-i18n');
@@ -109,16 +109,19 @@ function updateLanguage() {
   const simpleNameSpan = document.querySelector('img[alt="Prime"]').nextElementSibling;
   simpleNameSpan.textContent = translations[lang].simple_resonator_name;
 
-  document.getElementById('lastUpdated').innerHTML = `<span data-i18n="last_updated_prefix">${translations[lang].last_updated_prefix}</span> —`;
-
+  const lastUpdatedElement = document.getElementById('lastUpdated');
+  if (lastUpdatedElement) {
+      lastUpdatedElement.innerHTML = `<span data-i18n="last_updated_prefix">${translations[lang].last_updated_prefix}</span> —`;
+  }
+  
   // Пересчитываем результаты, чтобы обновить текст
-  const calculator = new ResonatorCalculator();
-  calculator.renderResonatorCosts(); // ИСПРАВЛЕНИЕ: Добавлен вызов для отображения стоимости
+  calculator.renderResonatorCosts();
   calculator.calculate();
 
   // Обновляем ископаемые
-  const market = new FossilMarket();
-  market.renderFossilData(market.currentFossilData);
+  if (market) {
+    market.renderFossilData(market.currentFossilData);
+  }
 }
 // ----------------------------------------------------------------------
 
@@ -139,7 +142,9 @@ document.querySelectorAll('.nav-tab').forEach(tab => {
 // --- СЛУШАТЕЛЬ ДЛЯ ПЕРЕКЛЮЧАТЕЛЯ ЯЗЫКОВ ---
 document.getElementById('language-switcher').addEventListener('change', (event) => {
   currentLanguage = event.target.value;
-  updateLanguage();
+  const calculator = new ResonatorCalculator();
+  const fossilMarket = new FossilMarket();
+  updateLanguage(calculator, fossilMarket);
 });
 // ----------------------------------------------------------------------
 
@@ -160,20 +165,21 @@ class ResonatorCalculator {
     const inputs = ['azuriteAmount', 'powerfulPrice', 'activePrice', 'simplePrice'];
     inputs.forEach(id => {
       const element = document.getElementById(id);
-      element.addEventListener('input', () => this.calculate());
-      element.addEventListener('keyup', () => this.calculate());
+      if (element) {
+        element.addEventListener('input', () => this.calculate());
+        element.addEventListener('keyup', () => this.calculate());
+      }
     });
   }
   
-  // ИСПРАВЛЕНИЕ: ДОБАВЛЕН НОВЫЙ МЕТОД ДЛЯ ОТОБРАЖЕНИЯ СТОИМОСТИ РЕЗОНАТОРОВ
   renderResonatorCosts() {
-    const powerfulCostElement = document.querySelector('img[alt="Powerful"]').parentElement.parentElement.nextElementSibling.querySelector('span');
-    const activeCostElement = document.querySelector('img[alt="Potent"]').parentElement.parentElement.nextElementSibling.querySelector('span');
-    const simpleCostElement = document.querySelector('img[alt="Prime"]').parentElement.parentElement.nextElementSibling.querySelector('span');
+    const powerfulCostElement = document.querySelector('img[alt="Powerful"]').closest('tr').querySelector('td:nth-child(2) span');
+    const activeCostElement = document.querySelector('img[alt="Potent"]').closest('tr').querySelector('td:nth-child(2) span');
+    const simpleCostElement = document.querySelector('img[alt="Prime"]').closest('tr').querySelector('td:nth-child(2) span');
 
-    powerfulCostElement.textContent = this.resonators.powerful.cost;
-    activeCostElement.textContent = this.resonators.active.cost;
-    simpleCostElement.textContent = this.resonators.simple.cost;
+    if (powerfulCostElement) powerfulCostElement.textContent = this.resonators.powerful.cost;
+    if (activeCostElement) activeCostElement.textContent = this.resonators.active.cost;
+    if (simpleCostElement) simpleCostElement.textContent = this.resonators.simple.cost;
   }
   
   calculate() {
@@ -246,6 +252,8 @@ class ResonatorCalculator {
     const container = document.getElementById('calculatorResults');
     const lang = currentLanguage;
     
+    if (!container) return;
+
     if (strategies.length === 0) {
       this.showInitialState();
       return;
@@ -257,263 +265,3 @@ class ResonatorCalculator {
         detailsHtml = `
           <div class="result-row">
             <span class="result-label">${translations[lang].combo_composition_label}</span>
-            <span class="result-value">${strategy.details}</span>
-          </div>
-        `;
-      } else {
-        detailsHtml = `
-          <div class="result-row">
-            <span class="result-label">${translations[lang].quantity_label}</span>
-            <span class="result-value">${strategy.quantity.toLocaleString()} ${translations[lang].per_piece_text}</span>
-          </div>
-        `;
-      }
-      
-      return `
-        <div class="result-card ${strategy.isBest ? 'best' : ''}">
-          <div class="result-title">
-            ${strategy.isBest ? '👑 ' : strategy.type === 'combo' ? '🔄 ' : '🔮 '}${strategy.name}
-          </div>
-          ${detailsHtml}
-          <div class="result-row total">
-            <span class="result-label">${translations[lang].total_profit_label}</span>
-            <span class="result-value">${strategy.profit.toFixed(2)} ${translations[lang].chaos_label}</span>
-          </div>
-        </div>
-      `;
-    }).join('');
-    
-    container.innerHTML = html;
-  }
-  
-  showInitialState() {
-    const container = document.getElementById('calculatorResults');
-    const lang = currentLanguage;
-    container.innerHTML = `
-      <div class="result-card">
-        <div class="result-title">📊 ${translations[lang].initial_calc_title}</div>
-        <p class="text-center status-neutral">${translations[lang].initial_calc_text}</p>
-      </div>
-    `;
-  }
-}
-
-// Fossil Market Data
-class FossilMarket {
-  constructor() {
-    this.FOSSIL_BIOME_RU = {
-      "Hollow Fossil": "🕳️ Глубины Бездны",
-      "Bound Fossil": "🕳️🌳 Окаменевший лес / Глубины Бездны",
-      "Jagged Fossil": "🌳 Окаменевший лес",
-      "Dense Fossil": "🍄 Грибные пещеры",
-      "Aberrant Fossil": "🍄🕳️ Грибные пещеры / Глубины Бездны",
-      "Pristine Fossil": "⛏️🔥 Шахты / Магмовый разлом",
-      "Metallic Fossil": "⛏️ Шахты",
-      "Serrated Fossil": "⛏️❄️ Шахты / Мёрзлая полость",
-      "Aetheric Fossil": "⛏️♨️ Шахты / Серные выходы",
-      "Frigid Fossil": "❄️ Мёрзлая полость",
-      "Prismatic Fossil": "❄️🔥 Мёрзлая полость / Магмовый разлом",
-      "Scorched Fossil": "🔥 Магмовый разлом",
-      "Deft Fossil": "🔥 Магмовый разлом",
-      "Fundamental Fossil": "🔥♨️ Магмовый разлом / Серные выходы",
-      "Lucent Fossil": "🕳️ Глубины Бездны",
-      "Perfect Fossil": "🍄♨️ Грибные пещеры / Серные выходы",
-      "Corroded Fossil": "🍄🌳 Грибные пещеры / Окаменевший лес",
-      "Gilded Fossil": "🍄🕳️ Грибные пещеры / Глубины Бездны",
-      "Encrusted Fossil": "🔥 Магмовый разлом",
-      "Sanctified Fossil": "🍄 Грибные пещеры",
-      "Tangled Fossil": "⛏️ Шахты",
-      "Glyphic Fossil": "⏳ Затерянная во времени пещера",
-      "Volatile Fossil": "🌋 Расплавленная полость",
-      "Shuddering Fossil": "💧 Отсыревшая трещина",
-      "Bloodstained Fossil": "🌋 Расплавленная полость",
-      "Fractured Fossil": "🌳 Окаменевший лес",
-      "Faceted Fossil": "🌋 Расплавленная полость"
-    };
-
-    this.FOSSIL_BIOME_EN = {
-      "Hollow Fossil": "🕳️ Abyssal Depths",
-      "Bound Fossil": "🕳️🌳 Petrified Forest / Abyssal Depths",
-      "Jagged Fossil": "🌳 Petrified Forest",
-      "Dense Fossil": "🍄 Fungal Caverns",
-      "Aberrant Fossil": "🍄🕳️ Fungal Caverns / Abyssal Depths",
-      "Pristine Fossil": "⛏️🔥 Mines / Magma Fissure",
-      "Metallic Fossil": "⛏️ Mines",
-      "Serrated Fossil": "⛏️❄️ Mines / Frozen Hollow",
-      "Aetheric Fossil": "⛏️♨️ Mines / Sulphur Vents",
-      "Frigid Fossil": "❄️ Frozen Hollow",
-      "Prismatic Fossil": "❄️🔥 Frozen Hollow / Magma Fissure",
-      "Scorched Fossil": "🔥 Magma Fissure",
-      "Deft Fossil": "🔥 Magma Fissure",
-      "Fundamental Fossil": "🔥♨️ Magma Fissure / Sulphur Vents",
-      "Lucent Fossil": "🕳️ Abyssal Depths",
-      "Perfect Fossil": "🍄♨️ Fungal Caverns / Sulphur Vents",
-      "Corroded Fossil": "🍄🌳 Fungal Caverns / Petrified Forest",
-      "Gilded Fossil": "🍄🕳️ Fungal Caverns / Abyssal Depths",
-      "Encrusted Fossil": "🔥 Magma Fissure",
-      "Sanctified Fossil": "🍄 Fungal Caverns",
-      "Tangled Fossil": "⛏️ Mines",
-      "Glyphic Fossil": "⏳ Lost in Time Cave",
-      "Volatile Fossil": "🌋 Molten Cavity",
-      "Shuddering Fossil": "💧 Soggy Fissure",
-      "Bloodstained Fossil": "🌋 Molten Cavity",
-      "Fractured Fossil": "🌳 Petrified Forest",
-      "Faceted Fossil": "🌋 Molten Cavity"
-    };
-
-    this.FOSSIL_RU_NAMES = {
-      "Hollow Fossil": "Пустотное ископаемое",
-      "Bound Fossil": "Связанное ископаемое",
-      "Jagged Fossil": "Зазубренное ископаемое",
-      "Dense Fossil": "Плотное ископаемое",
-      "Aberrant Fossil": "Искаженное ископаемое",
-      "Pristine Fossil": "Первозданное ископаемое",
-      "Metallic Fossil": "Металлическое ископаемое",
-      "Serrated Fossil": "Зазубренное ископаемое",
-      "Aetheric Fossil": "Эфирное ископаемое",
-      "Frigid Fossil": "Мерзлое ископаемое",
-      "Prismatic Fossil": "Призматическое ископаемое",
-      "Scorched Fossil": "Опаленное ископаемое",
-      "Deft Fossil": "Ловкое ископаемое",
-      "Fundamental Fossil": "Фундаментальное ископаемое",
-      "Lucent Fossil": "Светящееся ископаемое",
-      "Perfect Fossil": "Идеальное ископаемое",
-      "Corroded Fossil": "Разъеденное ископаемое",
-      "Gilded Fossil": "Позолоченное ископаемое",
-      "Encrusted Fossil": "Инкрустированное ископаемое",
-      "Sanctified Fossil": "Освященное ископаемое",
-      "Tangled Fossil": "Запутанное ископаемое",
-      "Glyphic Fossil": "Глифическое ископаемое",
-      "Volatile Fossil": "Изменчивое ископаемое",
-      "Shuddering Fossil": "Дрожащее ископаемое",
-      "Bloodstained Fossil": "Окровавленное ископаемое",
-      "Fractured Fossil": "Расколотое ископаемое",
-      "Faceted Fossil": "Гранёное ископаемое"
-    };
-
-    this.FOSSIL_EN_NAMES = {
-      "Hollow Fossil": "Hollow Fossil",
-      "Bound Fossil": "Bound Fossil",
-      "Jagged Fossil": "Jagged Fossil",
-      "Dense Fossil": "Dense Fossil",
-      "Aberrant Fossil": "Aberrant Fossil",
-      "Pristine Fossil": "Pristine Fossil",
-      "Metallic Fossil": "Metallic Fossil",
-      "Serrated Fossil": "Serrated Fossil",
-      "Aetheric Fossil": "Aetheric Fossil",
-      "Frigid Fossil": "Frigid Fossil",
-      "Prismatic Fossil": "Prismatic Fossil",
-      "Scorched Fossil": "Scorched Fossil",
-      "Deft Fossil": "Deft Fossil",
-      "Fundamental Fossil": "Fundamental Fossil",
-      "Lucent Fossil": "Lucent Fossil",
-      "Perfect Fossil": "Perfect Fossil",
-      "Corroded Fossil": "Corroded Fossil",
-      "Gilded Fossil": "Gilded Fossil",
-      "Encrusted Fossil": "Encrusted Fossil",
-      "Sanctified Fossil": "Sanctified Fossil",
-      "Tangled Fossil": "Tangled Fossil",
-      "Glyphic Fossil": "Glyphic Fossil",
-      "Volatile Fossil": "Volatile Fossil",
-      "Shuddering Fossil": "Shuddering Fossil",
-      "Bloodstained Fossil": "Bloodstained Fossil",
-      "Fractured Fossil": "Fractured Fossil",
-      "Faceted Fossil": "Faceted Fossil" // ИСПРАВЛЕНИЕ: Добавлен Faceted Fossil
-    };
-
-    this.currentFossilData = null; // Для сохранения данных после загрузки
-    this.init();
-  }
-  
-  async init() {
-    await this.loadLeagues();
-    await this.loadFossilData();
-    
-    document.getElementById('leagueSelect').addEventListener('change', () => this.loadFossilData());
-    document.getElementById('refreshBtn').addEventListener('click', () => this.loadFossilData());
-  }
-  
-  async loadLeagues() {
-    const endpoints = [
-      'https://poe.ninja/api/data/getindexstate',
-      'https://www.poe.ninja/api/data/getindexstate',
-      'https://api.allorigins.win/raw?url=https://poe.ninja/api/data/getindexstate',
-      'https://api.codetabs.com/v1/proxy?quest=https://poe.ninja/api/data/getindexstate'
-    ];
-    
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(endpoint, { 
-          cache: 'no-store',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        
-        if (!response.ok) continue;
-        
-        const data = await response.json();
-        const leagues = data.economyLeagues || [];
-        
-        if (leagues.length > 0) {
-          const select = document.getElementById('leagueSelect');
-          select.innerHTML = '';
-          
-          leagues.forEach(league => {
-            if (!league.match(/ruthless/i)) {
-              const option = document.createElement('option');
-              option.value = league;
-              option.textContent = league;
-              select.appendChild(option);
-            }
-          });
-          
-          const currentLeague = leagues.find(l => !l.toLowerCase().includes('hardcore')) || leagues[0];
-          if (currentLeague) {
-            select.value = currentLeague;
-          }
-          return;
-        }
-      } catch (error) {
-        console.warn(`Failed to load leagues from ${endpoint}:`, error);
-        continue;
-      }
-    }
-    
-    const select = document.getElementById('leagueSelect');
-    select.innerHTML = '<option value="Mercenaries">Mercenaries</option><option value="Hardcore Mercenaries">Hardcore Mercenaries</option>';
-  }
-  
-  async loadFossilData() {
-    const tbody = document.getElementById('fossilTableBody');
-    const lastUpdated = document.getElementById('lastUpdated');
-    
-    tbody.innerHTML = '<tr><td colspan="5"><div class="progress-container"><span data-i18n="loading_data_text">Загрузка данных с poe.ninja</span><div class="progress-bar"></div></div></td></tr>';
-    
-    const league = document.getElementById('leagueSelect').value;
-    
-    const endpoints = [
-      `https://poe.ninja/api/data/itemoverview?league=${encodeURIComponent(league)}&type=Fossil`,
-      `https://www.poe.ninja/api/data/itemoverview?league=${encodeURIComponent(league)}&type=Fossil`,
-      `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://poe.ninja/api/data/itemoverview?league=${league}&type=Fossil`)}`,
-      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://poe.ninja/api/data/itemoverview?league=${league}&type=Fossil`)}`
-    ];
-    
-    for (const endpoint of endpoints) {
-      try {
-        const response = await fetch(endpoint, { 
-          cache: 'no-store',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-        
-        if (!response.ok) continue;
-        
-        const data = await response.json();
-        
-        if (data && data.lines && Array.isArray(data.lines) && data.lines.length > 0) {
-          this.currentFossilData = data.lines;
-          this.renderFossilData(data.lines);
-          const lang = currentLanguage;
-          lastUpdated.innerHTML = `<span data-i18n="last_updated_prefix">${translations[lang].last_updated_prefix}</span> ${
