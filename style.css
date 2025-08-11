@@ -450,4 +450,18 @@ header #language-switcher {
   position: absolute;
   top: 0;
   left: 0;
-  width: 5
+  width: 50%;
+  height: 100%;
+  background-color: var(--accent-blue);
+  animation: loading-animation 1.5s infinite ease-in-out;
+}
+
+@keyframes loading-animation {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(100%); }
+}
+
+.text-center {
+  text-align: center;
+}
