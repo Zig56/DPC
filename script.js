@@ -265,3 +265,382 @@ class ResonatorCalculator {
         detailsHtml = `
           <div class="result-row">
             <span class="result-label">${translations[lang].combo_composition_label}</span>
+            <span class="result-value">${strategy.details}</span>
+          </div>
+        `;
+      } else {
+        detailsHtml = `
+          <div class="result-row">
+            <span class="result-label">${translations[lang].quantity_label}</span>
+            <span class="result-value">${strategy.quantity.toLocaleString()} ${translations[lang].per_piece_text}</span>
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="result-card ${strategy.isBest ? 'best' : ''}">
+          <div class="result-title">
+            ${strategy.isBest ? '👑 ' : strategy.type === 'combo' ? '🔄 ' : '🔮 '}${strategy.name}
+          </div>
+          ${detailsHtml}
+          <div class="result-row total">
+            <span class="result-label">${translations[lang].total_profit_label}</span>
+            <span class="result-value">${strategy.profit.toFixed(2)} ${translations[lang].chaos_label}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+    
+    container.innerHTML = html;
+  }
+  
+  showInitialState() {
+    const container = document.getElementById('calculatorResults');
+    const lang = currentLanguage;
+
+    if (!container) return;
+
+    container.innerHTML = `
+      <div class="result-card">
+        <div class="result-title">📊 ${translations[lang].initial_calc_title}</div>
+        <p class="text-center status-neutral">${translations[lang].initial_calc_text}</p>
+      </div>
+    `;
+  }
+}
+
+// Fossil Market Data
+class FossilMarket {
+  constructor() {
+    this.FOSSIL_BIOME_RU = {
+      "Hollow Fossil": "🕳️ Глубины Бездны",
+      "Bound Fossil": "🕳️🌳 Окаменевший лес / Глубины Бездны",
+      "Jagged Fossil": "🌳 Окаменевший лес",
+      "Dense Fossil": "🍄 Грибные пещеры",
+      "Aberrant Fossil": "🍄🕳️ Грибные пещеры / Глубины Бездны",
+      "Pristine Fossil": "⛏️🔥 Шахты / Магмовый разлом",
+      "Metallic Fossil": "⛏️ Шахты",
+      "Serrated Fossil": "⛏️❄️ Шахты / Мёрзлая полость",
+      "Aetheric Fossil": "⛏️♨️ Шахты / Серные выходы",
+      "Frigid Fossil": "❄️ Мёрзлая полость",
+      "Prismatic Fossil": "❄️🔥 Мёрзлая полость / Магмовый разлом",
+      "Scorched Fossil": "🔥 Магмовый разлом",
+      "Deft Fossil": "🔥 Магмовый разлом",
+      "Fundamental Fossil": "🔥♨️ Магмовый разлом / Серные выходы",
+      "Lucent Fossil": "🕳️ Глубины Бездны",
+      "Perfect Fossil": "🍄♨️ Грибные пещеры / Серные выходы",
+      "Corroded Fossil": "🍄🌳 Грибные пещеры / Окаменевший лес",
+      "Gilded Fossil": "🍄🕳️ Грибные пещеры / Глубины Бездны",
+      "Encrusted Fossil": "🔥 Магмовый разлом",
+      "Sanctified Fossil": "🍄 Грибные пещеры",
+      "Tangled Fossil": "⛏️ Шахты",
+      "Glyphic Fossil": "⏳ Затерянная во времени пещера",
+      "Volatile Fossil": "🌋 Расплавленная полость",
+      "Shuddering Fossil": "💧 Отсыревшая трещина",
+      "Bloodstained Fossil": "🌋 Расплавленная полость",
+      "Fractured Fossil": "🌳 Окаменевший лес",
+      "Faceted Fossil": "🌋 Расплавленная полость"
+    };
+
+    this.FOSSIL_BIOME_EN = {
+      "Hollow Fossil": "🕳️ Abyssal Depths",
+      "Bound Fossil": "🕳️🌳 Petrified Forest / Abyssal Depths",
+      "Jagged Fossil": "🌳 Petrified Forest",
+      "Dense Fossil": "🍄 Fungal Caverns",
+      "Aberrant Fossil": "🍄🕳️ Fungal Caverns / Abyssal Depths",
+      "Pristine Fossil": "⛏️🔥 Mines / Magma Fissure",
+      "Metallic Fossil": "⛏️ Mines",
+      "Serrated Fossil": "⛏️❄️ Mines / Frozen Hollow",
+      "Aetheric Fossil": "⛏️♨️ Mines / Sulphur Vents",
+      "Frigid Fossil": "❄️ Frozen Hollow",
+      "Prismatic Fossil": "❄️🔥 Frozen Hollow / Magma Fissure",
+      "Scorched Fossil": "🔥 Magma Fissure",
+      "Deft Fossil": "🔥 Magma Fissure",
+      "Fundamental Fossil": "🔥♨️ Magma Fissure / Sulphur Vents",
+      "Lucent Fossil": "🕳️ Abyssal Depths",
+      "Perfect Fossil": "🍄♨️ Fungal Caverns / Sulphur Vents",
+      "Corroded Fossil": "🍄🌳 Fungal Caverns / Petrified Forest",
+      "Gilded Fossil": "🍄🕳️ Fungal Caverns / Abyssal Depths",
+      "Encrusted Fossil": "🔥 Magma Fissure",
+      "Sanctified Fossil": "🍄 Fungal Caverns",
+      "Tangled Fossil": "⛏️ Mines",
+      "Glyphic Fossil": "⏳ Lost in Time Cave",
+      "Volatile Fossil": "🌋 Molten Cavity",
+      "Shuddering Fossil": "💧 Soggy Fissure",
+      "Bloodstained Fossil": "🌋 Molten Cavity",
+      "Fractured Fossil": "🌳 Petrified Forest",
+      "Faceted Fossil": "🌋 Molten Cavity"
+    };
+
+    this.FOSSIL_RU_NAMES = {
+      "Hollow Fossil": "Пустотное ископаемое",
+      "Bound Fossil": "Связанное ископаемое",
+      "Jagged Fossil": "Зазубренное ископаемое",
+      "Dense Fossil": "Плотное ископаемое",
+      "Aberrant Fossil": "Искаженное ископаемое",
+      "Pristine Fossil": "Первозданное ископаемое",
+      "Metallic Fossil": "Металлическое ископаемое",
+      "Serrated Fossil": "Зазубренное ископаемое",
+      "Aetheric Fossil": "Эфирное ископаемое",
+      "Frigid Fossil": "Мерзлое ископаемое",
+      "Prismatic Fossil": "Призматическое ископаемое",
+      "Scorched Fossil": "Опаленное ископаемое",
+      "Deft Fossil": "Ловкое ископаемое",
+      "Fundamental Fossil": "Фундаментальное ископаемое",
+      "Lucent Fossil": "Светящееся ископаемое",
+      "Perfect Fossil": "Идеальное ископаемое",
+      "Corroded Fossil": "Разъеденное ископаемое",
+      "Gilded Fossil": "Позолоченное ископаемое",
+      "Encrusted Fossil": "Инкрустированное ископаемое",
+      "Sanctified Fossil": "Освященное ископаемое",
+      "Tangled Fossil": "Запутанное ископаемое",
+      "Glyphic Fossil": "Глифическое ископаемое",
+      "Volatile Fossil": "Изменчивое ископаемое",
+      "Shuddering Fossil": "Дрожащее ископаемое",
+      "Bloodstained Fossil": "Окровавленное ископаемое",
+      "Fractured Fossil": "Расколотое ископаемое",
+      "Faceted Fossil": "Гранёное ископаемое"
+    };
+
+    this.FOSSIL_EN_NAMES = {
+      "Hollow Fossil": "Hollow Fossil",
+      "Bound Fossil": "Bound Fossil",
+      "Jagged Fossil": "Jagged Fossil",
+      "Dense Fossil": "Dense Fossil",
+      "Aberrant Fossil": "Aberrant Fossil",
+      "Pristine Fossil": "Pristine Fossil",
+      "Metallic Fossil": "Metallic Fossil",
+      "Serrated Fossil": "Serrated Fossil",
+      "Aetheric Fossil": "Aetheric Fossil",
+      "Frigid Fossil": "Frigid Fossil",
+      "Prismatic Fossil": "Prismatic Fossil",
+      "Scorched Fossil": "Scorched Fossil",
+      "Deft Fossil": "Deft Fossil",
+      "Fundamental Fossil": "Fundamental Fossil",
+      "Lucent Fossil": "Lucent Fossil",
+      "Perfect Fossil": "Perfect Fossil",
+      "Corroded Fossil": "Corroded Fossil",
+      "Gilded Fossil": "Gilded Fossil",
+      "Encrusted Fossil": "Encrusted Fossil",
+      "Sanctified Fossil": "Sanctified Fossil",
+      "Tangled Fossil": "Tangled Fossil",
+      "Glyphic Fossil": "Glyphic Fossil",
+      "Volatile Fossil": "Volatile Fossil",
+      "Shuddering Fossil": "Shuddering Fossil",
+      "Bloodstained Fossil": "Bloodstained Fossil",
+      "Fractured Fossil": "Fractured Fossil",
+      "Faceted Fossil": "Faceted Fossil"
+    };
+
+    this.currentFossilData = null; // Для сохранения данных после загрузки
+    this.init();
+  }
+  
+  async init() {
+    await this.loadLeagues();
+    await this.loadFossilData();
+    
+    document.getElementById('leagueSelect').addEventListener('change', () => this.loadFossilData());
+    document.getElementById('refreshBtn').addEventListener('click', () => this.loadFossilData());
+  }
+  
+  async loadLeagues() {
+    const endpoints = [
+      'https://poe.ninja/api/data/getindexstate',
+      'https://www.poe.ninja/api/data/getindexstate',
+      'https://api.allorigins.win/raw?url=https://poe.ninja/api/data/getindexstate',
+      'https://api.codetabs.com/v1/proxy?quest=https://poe.ninja/api/data/getindexstate'
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, { 
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) continue;
+        
+        const data = await response.json();
+        const leagues = data.economyLeagues || [];
+        
+        if (leagues.length > 0) {
+          const select = document.getElementById('leagueSelect');
+          select.innerHTML = '';
+          
+          leagues.forEach(league => {
+            if (!league.match(/ruthless/i)) {
+              const option = document.createElement('option');
+              option.value = league;
+              option.textContent = league;
+              select.appendChild(option);
+            }
+          });
+          
+          const currentLeague = leagues.find(l => !l.toLowerCase().includes('hardcore')) || leagues[0];
+          if (currentLeague) {
+            select.value = currentLeague;
+          }
+          return;
+        }
+      } catch (error) {
+        console.warn(`Failed to load leagues from ${endpoint}:`, error);
+        continue;
+      }
+    }
+    
+    const select = document.getElementById('leagueSelect');
+    if (select) {
+      select.innerHTML = '<option value="Mercenaries">Mercenaries</option><option value="Hardcore Mercenaries">Hardcore Mercenaries</option>';
+    }
+  }
+  
+  async loadFossilData() {
+    const tbody = document.getElementById('fossilTableBody');
+    const lastUpdated = document.getElementById('lastUpdated');
+
+    if (!tbody || !lastUpdated) return;
+
+    tbody.innerHTML = '<tr><td colspan="5"><div class="progress-container"><span data-i18n="loading_data_text">Загрузка данных с poe.ninja</span><div class="progress-bar"></div></div></td></tr>';
+    
+    const league = document.getElementById('leagueSelect').value;
+    
+    const endpoints = [
+      `https://poe.ninja/api/data/itemoverview?league=${encodeURIComponent(league)}&type=Fossil`,
+      `https://www.poe.ninja/api/data/itemoverview?league=${encodeURIComponent(league)}&type=Fossil`,
+      `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://poe.ninja/api/data/itemoverview?league=${league}&type=Fossil`)}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(`https://poe.ninja/api/data/itemoverview?league=${league}&type=Fossil`)}`
+    ];
+    
+    for (const endpoint of endpoints) {
+      try {
+        const response = await fetch(endpoint, { 
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+        
+        if (!response.ok) continue;
+        
+        const data = await response.json();
+        
+        if (data && data.lines && Array.isArray(data.lines) && data.lines.length > 0) {
+          this.currentFossilData = data.lines;
+          this.renderFossilData(data.lines);
+          const lang = currentLanguage;
+          lastUpdated.innerHTML = `<span data-i18n="last_updated_prefix">${translations[lang].last_updated_prefix}</span> ${new Date().toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US')}`;
+          return;
+        }
+      } catch (error) {
+        console.warn(`Failed to fetch from ${endpoint}:`, error);
+        continue;
+      }
+    }
+    
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center status-negative">❌ <span data-i18n="loading_error_text">Не удалось загрузить данные. Проверьте подключение или попробуйте позже.</span></td></tr>';
+  }
+  
+  renderFossilData(lines) {
+    const tbody = document.getElementById('fossilTableBody');
+    if (!tbody) return;
+
+    const lang = currentLanguage;
+    const biomeMap = lang === 'ru' ? this.FOSSIL_BIOME_RU : this.FOSSIL_BIOME_EN;
+    const nameMap = lang === 'ru' ? this.FOSSIL_RU_NAMES : this.FOSSIL_EN_NAMES;
+    
+    const topFossils = lines
+      .filter(item => item.chaosValue > 0)
+      .sort((a, b) => b.chaosValue - a.chaosValue)
+      .slice(0, 5);
+    
+    if (topFossils.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="5" class="text-center status-neutral" data-i18n="no_data_text">Нет данных для выбранной лиги</td></tr>`;
+      return;
+    }
+    
+    const html = topFossils.map((fossil, index) => {
+      const change = fossil.sparkline?.totalChange || 0;
+      const changeClass = change > 3 ? 'status-positive' : change < -3 ? 'status-negative' : 'status-neutral';
+      const changeText = change > 0 ? `+${change.toFixed(1)}%` : `${change.toFixed(1)}%`;
+      
+      const biome = biomeMap[fossil.name] || '—';
+      const sparklineSvg = this.generateSparkline(fossil.sparkline?.data);
+      
+      const rankNumber = index + 1;
+      
+      const fossilName = nameMap[fossil.name] || fossil.name;
+      
+      return `
+        <tr>
+          <td class="text-center">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <span style="font-weight: 600; color: var(--text-secondary); font-size: 0.9rem;">${rankNumber}.</span>
+              <img src="${fossil.icon}" class="icon" alt="${fossil.name}" onerror="this.style.display='none'">
+            </div>
+          </td>
+          <td class="font-bold">${fossilName}</td>
+          <td class="status-positive font-bold">${fossil.chaosValue.toFixed(1)} ${translations[lang].chaos_label}</td>
+          <td>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              ${sparklineSvg}
+              <span class="${changeClass} font-bold">${changeText}</span>
+            </div>
+          </td>
+          <td>
+            <span style="display: inline-block; padding: 4px 8px; border: 1px solid var(--border-secondary); border-radius: 16px; font-size: 0.75rem; color: var(--text-secondary); background: rgba(255,255,255,0.05); white-space: nowrap;">
+              ${biome}
+            </span>
+          </td>
+        </tr>
+      `;
+    }).join('');
+    
+    tbody.innerHTML = html;
+  }
+
+  generateSparkline(data) {
+    if (!data || data.length === 0) return '';
+    
+    const filteredData = data.filter(d => d !== null);
+    if (filteredData.length < 2) return '';
+
+    const width = 60;
+    const height = 30;
+    const padding = 2;
+    const max = Math.max(...filteredData);
+    const min = Math.min(...filteredData);
+    const range = max - min;
+    
+    if (range === 0) return '';
+    
+    const points = filteredData.map((d, i) => {
+      const x = i / (filteredData.length - 1) * (width - padding * 2) + padding;
+      const y = (1 - (d - min) / range) * (height - padding * 2) + padding;
+      return `${x.toFixed(1)},${y.toFixed(1)}`;
+    }).join(' ');
+
+    const lastPoint = points.split(' ').pop().split(',');
+    const trend = filteredData[filteredData.length - 1] > filteredData[0] ? 'up' : 'down';
+    const strokeColor = trend === 'up' ? 'var(--accent-green)' : 'var(--accent-red)';
+
+    return `
+      <div class="sparkline">
+        <svg width="${width}" height="${height}">
+          <polyline points="${points}" style="fill: none; stroke: ${strokeColor}; stroke-width: 1.5;" />
+          <circle cx="${lastPoint[0]}" cy="${lastPoint[1]}" r="2" style="fill: ${strokeColor}; stroke: none;" />
+        </svg>
+      </div>
+    `;
+  }
+}
+
+// Initialize application
+document.addEventListener('DOMContentLoaded', () => {
+  const calculator = new ResonatorCalculator();
+  const fossilMarket = new FossilMarket();
+  document.getElementById('language-switcher').value = currentLanguage;
+  updateLanguage(calculator, fossilMarket);
+});
