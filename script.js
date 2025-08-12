@@ -280,7 +280,7 @@ class ResonatorCalculator {
       return `
         <div class="result-card ${strategy.isBest ? 'best' : ''}">
           <div class="result-title">
-            ${strategy.isBest ? '👑 ' : strategy.type === 'combo' ? '🔄 ' : '🔮 '}${strategy.name}
+            ${strategy.isBest ? '👑 ' : strategy.type === 'combo' ? '🔄 ' : ' '}${strategy.name}
           </div>
           ${detailsHtml}
           <div class="result-row total">
